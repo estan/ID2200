@@ -1,2 +1,2 @@
 all:
-	gcc -Wall -o digenv digenv.c
+	gcc -g -std=c99 -Wall -o digenv digenv.c
