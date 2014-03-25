@@ -1,2 +1,2 @@
 all:
-	gcc -g -std=c99 -Wall -o digenv digenv.c
+	gcc -g -ansi -Wall -o digenv digenv.c pipe.c

@@ -1,32 +1,36 @@
 #include "pipe.h"
 
 #include <stdlib.h>
+#include <unistd.h>
 
-int main(int argc, const char **argv) {
+int main(int argc, char *argv[]) {
 
-    const char *printenv_argv[] = { "printenv", NULL };
-    command_t printenv_command = { "printenv", printenv_argv, NULL };
+    /* Command argument vectors. */
+    char *more_argv[]     = { "more", NULL };
+    char *less_argv[]     = { "less", NULL };
+    char *pager_argv[]    = { getenv("PAGER"), NULL };
+    char *sort_argv[]     = { "sort", NULL };
+    char *printenv_argv[] = { "printenv", NULL };
+    char **grep_argv      = argv;
+    grep_argv[0]          = "grep";
 
-    const char **grep_argv = argv;
-    grep_argv[0] = "grep";
-    command_t grep_command = { "grep", grep_argv, NULL };
+    /* Construct pipeline. */
+    
+    /*                     file             argv           err  next    fallback */
+    command_t more     = { "more",          more_argv,     0,   NULL,   NULL};
+    command_t less     = { "less",          less_argv,     0,   NULL,   &more };
+    command_t pager    = { getenv("PAGER"), pager_argv,    0,   NULL,   &less };
+    command_t sort     = { "sort",          sort_argv,     0,   &pager, NULL };
+    command_t grep     = { "grep",          grep_argv,     0,   &sort,  NULL };
+    command_t printenv = { "printenv",      printenv_argv, 0,   &sort,  NULL };
 
-    const char *more_argv[] = { "more", NULL };
-    command_t more_command = { "more", more_argv, NULL };
+    if (argc > 1) {
+        /* Arguments given: Run grep as well. */
+        printenv.next = &grep;
+    }
 
-    const char *less_argv[] = { "less", NULL };
-    command_t less_command = { "less", less_argv, &more_command };
-
-    const char *pager_argv[] = { getenv("PAGER"), NULL };
-    command_t pager_command = { getenv("PAGER"), pager_argv, &less_command };
-
-    command_t pipeline[] = {
-        printenv_command,
-        grep_command,
-        pager_command
-    };
-
-    run_pipeline(pipeline, 3, 0);
+    /* Run pipeline. */
+    run_pipeline(&printenv, STDIN_FILENO);
 
     return 0;
 }
