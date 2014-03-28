@@ -12,7 +12,8 @@
  * Turns the file descriptor new into a copy of old.
  *
  * If the redirection succeeds, old will be closed. If old and new is the same file
- * descriptor, this function is a no-op.
+ * descriptor, this function is a no-op. If redirection fails, the function prints
+ * and error and exits the process with EXIT_FAILURE.
  */
 void copy_fd(int old, int new) {
     if (new != old) {
@@ -31,7 +32,7 @@ void copy_fd(int old, int new) {
  *
  * This function will try to run the given command using execvp(). If it fails,
  * the fallback command is tried instead. If all fallbacks fails, the function
- * prints an error to stderr and returns.
+ * prints an error to stderr and exits the process with EXIT_FAILURE.
  *
  * Commands with a NULL file field are ignored.
  */
@@ -63,7 +64,8 @@ void invoke(command_t *command) {
  *
  * This function will construct a new pipe for communication between the given
  * command and the next, fork a new child process in which the command is executed,
- * then call itself recursively to set up the rest of the pipeline.
+ * then call itself recursively to set up the rest of the pipeline. If at some
+ * point an error is encountered, an error is printed and the recursion stops.
  */
 void run_pipeline(command_t *command, int in) {
     int fd[2];
