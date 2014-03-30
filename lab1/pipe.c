@@ -60,12 +60,13 @@ void invoke(command_t *command) {
 }
 
 /**
- * Runs a pipeline starting with the given command.
+ * Runs a pipeline starting with the given command and input file descriptor.
  *
  * This function will construct a new pipe for communication between the given
  * command and the next, fork a new child process in which the command is executed,
- * then call itself recursively to set up the rest of the pipeline. If at some
- * point an error is encountered, an error is printed and the recursion stops.
+ * then call itself recursively to set up the rest of the pipeline. Input for
+ * the pipeline is taken from the given file descriptor. If at some point an error
+ * is encountered, an error message is printed and the recursion stops.
  */
 void run_pipeline(command_t *command, int in) {
     int fd[2];
