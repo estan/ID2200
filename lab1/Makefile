@@ -1,2 +1,2 @@
 all:
-	gcc -g -ansi -Wall -o digenv digenv.c pipe.c
+	gcc -g -Wall -o digenv digenv.c pipe.c
