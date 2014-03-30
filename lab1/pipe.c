@@ -13,7 +13,7 @@
  *
  * If the redirection succeeds, old will be closed. If old and new is the same file
  * descriptor, this function is a no-op. If redirection fails, the function prints
- * and error and exits the process with EXIT_FAILURE.
+ * an error and exits the process with EXIT_FAILURE.
  */
 void copy_fd(int old, int new) {
     if (new != old) {
