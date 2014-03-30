@@ -71,7 +71,9 @@ void run_pipeline(command_t *command, int in) {
     int fd[2];
     pid_t pid;
     int status;
+
     if (command->next == NULL) {
+        /* Last command, stop forking. */
         copy_fd(in, STDIN_FILENO);
         invoke(command);
     } else {
