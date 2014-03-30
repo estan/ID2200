@@ -70,6 +70,7 @@ void invoke(command_t *command) {
 void run_pipeline(command_t *command, int in) {
     int fd[2];
     pid_t pid;
+    int status;
     if (command->next == NULL) {
         copy_fd(in, STDIN_FILENO);
         invoke(command);
@@ -104,7 +105,6 @@ void run_pipeline(command_t *command, int in) {
                 perror("close");
                 exit(EXIT_FAILURE);
             }
-            int status;
             wait(&status);
             if (!WEXITSTATUS(status)) {
                 /* Child exited normally, run rest of pipeline */
