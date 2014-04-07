@@ -1,4 +1,4 @@
 ID2200
 ======
 
-Labs for ID2200
+Lab exercise solutions for ID2200 at KTH.
