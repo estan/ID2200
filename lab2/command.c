@@ -80,7 +80,7 @@ int handle_cd(command_t *command) {
     if (command->argc == 2) {
         dir = command->argv[1];
     } else if (!(dir = getenv("HOME"))) {
-        fprintf(stderr, "cd: No dir given and HOME not set");
+        fprintf(stderr, "cd: No dir given and HOME not set\n");
         return 0;
     }
 
