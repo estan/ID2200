@@ -23,6 +23,8 @@ int main(int argc, char *argv[]) {
     /* The shell process itself ignores SIGINT. */
     struct sigaction action;
     action.sa_handler = SIG_IGN;
+    action.sa_flags = 0;
+    sigemptyset(&action.sa_mask);
     if (sigaction(SIGINT, &action, NULL) == -1) {
         perror("sigaction");
         return EXIT_FAILURE;
