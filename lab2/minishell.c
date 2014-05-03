@@ -59,6 +59,8 @@ int main(int argc, char *argv[]) {
             } else if (pid == 0) {
                 // Execute command.
                 execvp(command->argv[0], command->argv);
+                perror(command->argv[0]);
+                exit(EXIT_FAILURE);
             } else {
                 if (command->type == FOREGROUND) {
                     printf("Spawned foreground process pid: %d\n", pid);
