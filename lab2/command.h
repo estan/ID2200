@@ -28,9 +28,8 @@ typedef struct command_s {
 /**
  * Reads a command from the user and returns it.
  *
- * Only the MAX_ARGS first number of arguments will be read. The caller
- * must free the returned command with free_command(). If the entered
- * command was empty, NULL is returned.
+ * The caller must free the returned command with free_command(). If
+ * the entered command was empty, NULL is returned.
  */
 command_t *read_command();
 
