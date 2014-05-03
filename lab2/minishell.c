@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     action.sa_handler = SIG_IGN;
     if (sigaction(SIGINT, &action, NULL) == -1) {
         perror("sigaction");
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     while (1) {
