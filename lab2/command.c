@@ -75,19 +75,23 @@ int handle_cd(command_t *command) {
         return 0;
     }
 
-    // Determine directory to change to.
-    char *dir;
-    if (command->argc == 2) {
-        dir = command->argv[1];
-    } else if (!(dir = getenv("HOME"))) {
-        fprintf(stderr, "cd: No dir given and HOME not set\n");
-        return 0;
-    }
-
     // Change directory.
-    if (chdir(dir) == -1) {
-        perror(dir);
-        return 0;
+    if (chdir(command->argv[1]) == -1) {
+        if (command->argc > 1)
+            perror(command->argv[1]);
+
+        // Try HOME instead.
+        fprintf(stderr, "cd: Trying HOME...\n");
+        const char *home = getenv("HOME");
+        if (!home) {
+            fprintf(stderr, "cd: HOME is not set!\n");
+            return 0;
+        } else if (chdir(home) == -1) {
+            perror(home);
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     return 1;
