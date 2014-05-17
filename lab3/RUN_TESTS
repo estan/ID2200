@@ -6,26 +6,19 @@ echo "- source file to understand what the test is checking"
 echo ""
 echo -n "********************* TEST MERGE ... "
 read answ
-./t0
+./tstmerge
 echo -n "********************* TEST ALGORITHMS ... "
 read answ
-./t1
+./tstalgorithms
 echo -n "********************* TEST EXTREME USAGE ... "
 read ans
-./t2
+./tstextreme
 echo -n "********************* TEST MALLOC ... "
 read ans
-./t3
+./tstmalloc
 echo -n "********************* TEST MEMORY ... "
 read ans
-./t4
+./tstmemory
 echo -n "********************* TEST REALLOC ... "
 read ans
-./t5
-echo -n "********************* TEST CRASH  SIMPLE ... "
-read ans
-./t6
-echo -n "********************* TEST CRASH COMPLEX ...  "
-read ans
-./t7
-
+./tstrealloc
