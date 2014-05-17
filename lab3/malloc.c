@@ -1,4 +1,9 @@
 #include "brk.h"
+
+#ifdef __linux__
+#define _GNU_SOURCE /* To get MAP_ANONYMOUS on Linux (mmap(2)) */
+#endif /* __linux__ */
+
 #include <unistd.h>
 #include <string.h> 
 #include <errno.h> 
