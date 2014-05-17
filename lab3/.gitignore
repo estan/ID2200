@@ -1,0 +1,11 @@
+tstalgorithms
+tstextreme
+tstmalloc
+tstmemory
+tstmerge
+tstrealloc
+*.o
+*.config
+*.creator*
+*.files
+*.includes
