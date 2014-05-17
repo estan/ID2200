@@ -1,5 +1,5 @@
 CC = gcc 
-CFLAGS = -g -Wall -ansi -DSTRATEGY=2
+CFLAGS = -g -Wall -ansi -D_GNU_SOURCE -DSTRATEGY=2
 BIN = tstmerge tstalgorithms tstextreme tstmalloc tstmemory tstrealloc
 
 all: $(BIN)
@@ -8,7 +8,7 @@ all: $(BIN)
 malloc.o: malloc.c
 	$(CC) -c $(CFLAGS) -o $@ malloc.c
 
-$(BIN): % : %.c malloc.o
+$(BIN): % : malloc.o %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:

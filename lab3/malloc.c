@@ -1,131 +1,165 @@
-#include "brk.h"
-
-#ifdef __linux__
-#define _GNU_SOURCE /* To get MAP_ANONYMOUS on Linux (mmap(2)) */
-#endif /* __linux__ */
-
-#include <unistd.h>
-#include <string.h> 
+#include <stdlib.h>
 #include <stdio.h>
-#include <errno.h> 
+#include <unistd.h>
+#include <string.h>
 #include <sys/mman.h>
 
-#define NALLOC 1024                                     /* minimum #units to request */
+#define MIN_UNITS 1024
 
-typedef long Align;                                     /* for alignment to long boundary */
+/* The most restrictive type of the machine. */
+typedef long align_t;
 
-union header {                                          /* block header */
+/* Block header data structure. */
+typedef union header_u {
     struct {
-        union header *ptr;                                  /* next block if on free list */
-        unsigned size;                                      /* size of this block  - what unit? */
+        union header_u *next; /* Next free block list. */
+        size_t size;          /* Size of block, including header. */
     } s;
-    Align x;                                              /* force alignment of blocks */
-};
+    align_t dummy; /* Force alignment to align_t boundaries. */
+} header_t;
 
-typedef union header Header;
+static header_t base = { { &base, 0 } }; /* Base of free list. */
+static header_t *freep = &base;          /* Free block pointer. */
+static void *heap_end = 0;               /* End of heap. */
 
-static Header base;                                     /* empty list to get started */
-static Header *freep = NULL;                            /* start of free list */
-
-/* free: put block ap in the free list */
-
-void free(void * ap)
-{
-    Header *bp, *p;
-
-    if(ap == NULL) return;                                /* Nothing to do */
-
-    bp = (Header *) ap - 1;                               /* point to block header */
-    for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
-        if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
-            break;                                            /* freed block at atrt or end of arena */
-
-    if(bp + bp->s.size == p->s.ptr) {                     /* join to upper nb */
-        bp->s.size += p->s.ptr->s.size;
-        bp->s.ptr = p->s.ptr->s.ptr;
-    }
-    else
-        bp->s.ptr = p->s.ptr;
-    if(p + p->s.size == bp) {                             /* join to lower nbr */
-        p->s.size += bp->s.size;
-        p->s.ptr = bp->s.ptr;
-    } else
-        p->s.ptr = bp;
-    freep = p;
+/* Returns a pointer to the end of the heap. */
+void *endHeap() {
+    if (heap_end == 0)
+        heap_end = sbrk(0);
+    return heap_end;
 }
 
-/* morecore: ask system for more memory */
+/*
+ * Adds a new block of least min(nunits, MIN_UNITS) * sizeof(header_t) bytes
+ * of memory to the free list. Returns a pointer to the added block, or NULL
+ * if the request failed.
+ */
+static header_t *add_memory(size_t nunits) {
+    const void *mem;
+    header_t *header;
+    size_t npages;
 
-#ifdef MMAP
+    const static int flags = MAP_SHARED | MAP_ANONYMOUS;
+    const static int protection = PROT_READ | PROT_WRITE;
+    const long page_size = sysconf(_SC_PAGESIZE);
 
-static void * __endHeap = 0;
+    if (nunits < MIN_UNITS)
+        nunits = MIN_UNITS;
 
-void * endHeap(void)
-{
-    if(__endHeap == 0) __endHeap = sbrk(0);
-    return __endHeap;
-}
-#endif
+    if (heap_end == 0)
+        heap_end = sbrk(0);
 
-
-static Header *morecore(unsigned nu)
-{
-    void *cp;
-    Header *up;
-#ifdef MMAP
-    unsigned noPages;
-    if(__endHeap == 0) __endHeap = sbrk(0);
-#endif
-
-    if(nu < NALLOC)
-        nu = NALLOC;
-#ifdef MMAP
-    noPages = ((nu*sizeof(Header))-1)/getpagesize() + 1;
-    cp = mmap(__endHeap, noPages*getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    nu = (noPages*getpagesize())/sizeof(Header);
-    __endHeap += noPages*getpagesize();
-#else
-    cp = sbrk(nu*sizeof(Header));
-#endif
-    if(cp == (void *) -1){                                 /* no space at all */
-        perror("failed to get more memory");
+    npages = (nunits * sizeof(header_t) - 1) / page_size + 1;
+    mem = mmap(heap_end, npages * page_size, protection, flags, -1, 0);
+    if (mem == MAP_FAILED) {
+        perror("mmap");
         return NULL;
     }
-    up = (Header *) cp;
-    up->s.size = nu;
-    free((void *)(up+1));
+    nunits = (npages * page_size) / sizeof(header_t);
+    heap_end += npages * page_size;
+    header = (header_t *)mem;
+    header->s.size = nunits;
+    free(header + 1);
     return freep;
 }
 
-void * malloc(size_t nbytes)
-{
-    Header *p, *prevp;
-    Header * morecore(unsigned);
-    unsigned nunits;
+/* Allocates size bytes and return a pointer to the allocated memory. */
+void *malloc(size_t size) {
+    header_t *p, *prevp;
 
-    if(nbytes == 0) return NULL;
+    /* Calculate number of header-sized units required. */
+    size_t nunits = (size + sizeof(header_t) - 1) / sizeof(header_t) + 1;
 
-    nunits = (nbytes+sizeof(Header)-1)/sizeof(Header) +1;
+    if (size == 0)
+        return NULL; /* No-op */
 
-    if((prevp = freep) == NULL) {
-        base.s.ptr = freep = prevp = &base;
-        base.s.size = 0;
-    }
-    for(p= prevp->s.ptr;  ; prevp = p, p = p->s.ptr) {
-        if(p->s.size >= nunits) {                           /* big enough */
-            if (p->s.size == nunits)                          /* exactly */
-                prevp->s.ptr = p->s.ptr;
-            else {                                            /* allocate tail end */
+    for (prevp = freep, p = prevp->s.next; ; prevp = p, p = p->s.next) {
+        if (p->s.size >= nunits) {
+            /* p is big enough. */
+            if (p->s.size == nunits) {
+                /* p is exactly big enough, remove from free list. */
+                prevp->s.next = p->s.next;
+            } else {
+                /* p is more than big enough, allocate from tail end. */
                 p->s.size -= nunits;
                 p += p->s.size;
                 p->s.size = nunits;
             }
             freep = prevp;
-            return (void *)(p+1);
+            return (void *)(p + 1);
         }
-        if(p == freep)                                      /* wrapped around free list */
-            if((p = morecore(nunits)) == NULL)
-                return NULL;                                    /* none left */
+        if (p == freep) {
+            /* No suitably large block found. */
+            if ((p = add_memory(nunits)) == NULL) {
+                /* Out of memory */
+                return NULL;
+            }
+        }
     }
 }
 
+/* Frees the memory block pointed to by ptr. */
+void free(void *ptr) {
+    header_t *freed, *p;
+
+    if (ptr == NULL) {
+        return; /* No-op */
+    }
+
+    freed = (header_t *) ptr - 1; /* Point to block header. */
+
+    /* Find insertion point p for bp. */
+    for (p = freep; !(p < freed && freed < p->s.next); p = p->s.next) {
+        if (p >= p->s.next && (p < freed || freed < p->s.next)) {
+            /* Insertion point is either start or end of list. */
+            break;
+        }
+    }
+    if (freed + freed->s.size == p->s.next) {
+        /* Merge with upper neighbor. */
+        freed->s.size += p->s.next->s.size;
+        freed->s.next = p->s.next->s.next;
+    } else {
+        freed->s.next = p->s.next;
+    }
+    if(p + p->s.size == freed) {
+        /* Merge with lower neighbor. */
+        p->s.size += freed->s.size;
+        p->s.next = freed->s.next;
+    } else {
+        p->s.next = freed;
+    }
+    freep = p;
+}
+
+/* Change size of memory block pointer to by ptr to size bytes. */
+void *realloc(void *ptr, size_t size) {
+    header_t *old_header;
+    size_t old_size;
+    void *new_ptr;
+
+    if (ptr == NULL) {
+        return malloc(size);
+    }
+    if (size == 0) {
+        free(ptr);
+        return NULL;
+    }
+
+    /* Get old header and size. */
+    old_header = (header_t *) ptr - 1;
+    old_size = (old_header->s.size - 1) * sizeof(header_t);
+
+    if (size == old_size) {
+        return ptr; /* No-op */
+    }
+
+    /* Allocate new memory, copy contents and free old memory. */
+    if ((new_ptr = malloc(size)) == NULL) {
+        return NULL;
+    }
+    memcpy(new_ptr, ptr, size < old_size ? size : old_size);
+    free(ptr);
+
+    return new_ptr;
+}
