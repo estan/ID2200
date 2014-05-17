@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include "tst.h"
 
-
+#pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 
 jmp_buf env;
 char *progname;

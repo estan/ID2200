@@ -5,6 +5,8 @@
 #include "tst.h"
 #include <unistd.h>
 
+#pragma GCC diagnostic ignored "-Wfree-nonheap-object"
+
 char *progname;
 
 void t_stack()
