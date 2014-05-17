@@ -98,7 +98,7 @@ void *malloc(size_t size) {
     }
 }
 
-/* Frees the memory block pointed to by ptr. */
+/* Frees the memory pointed to by ptr. */
 void free(void *ptr) {
     header_t *freed, *p;
 
