@@ -9,13 +9,15 @@ TESTS = tstmerge \
         tstmemory \
         tstrealloc
 
-BENCHMARKS = benchmark-small-first-fit \
-             benchmark-small-best-fit \
-             benchmark-small-system \
-             benchmark-big-first-fit \
-             benchmark-big-best-fit \
-             benchmark-big-system
-
+BENCHMARKS = benchmark-random-first-fit \
+             benchmark-random-best-fit \
+             benchmark-random-system \
+             benchmark-worst-first-fit \
+             benchmark-worst-best-fit \
+             benchmark-worst-system \
+             benchmark-best-first-fit \
+             benchmark-best-best-fit \
+             benchmark-best-system
 
 all: $(TESTS) $(BENCHMARKS)
 	#exec ./RUN_TESTS
@@ -26,22 +28,31 @@ malloc.o: malloc.c
 $(TESTS): % : malloc.o %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-benchmark-small-first-fit: malloc.c benchmark-small.c
+benchmark-random-first-fit: malloc.c benchmark-random.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
 
-benchmark-small-best-fit: malloc.c benchmark-small.c
+benchmark-random-best-fit: malloc.c benchmark-random.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
 
-benchmark-small-system: benchmark-small.c
+benchmark-random-system: benchmark-random.c
 	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
 
-benchmark-big-first-fit: malloc.c benchmark-big.c
+benchmark-worst-first-fit: malloc.c benchmark-worst.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
 
-benchmark-big-best-fit: malloc.c benchmark-big.c
+benchmark-worst-best-fit: malloc.c benchmark-worst.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
 
-benchmark-big-system: benchmark-big.c
+benchmark-worst-system: benchmark-worst.c
+	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
+
+benchmark-best-first-fit: malloc.c benchmark-best.c
+	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
+
+benchmark-best-best-fit: malloc.c benchmark-best.c
+	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
+
+benchmark-best-system: benchmark-best.c
 	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
 
 clean:

@@ -1,0 +1,13 @@
+#!/usr/bin/bash
+
+./benchmark-random-first-fit first-fit > data/random-first-fit.csv
+./benchmark-random-best-fit best-fit > data/random-best-fit.csv
+./benchmark-random-system system > data/random-system.csv
+
+./benchmark-worst-first-fit first-fit > data/worst-first-fit.csv
+./benchmark-worst-best-fit best-fit > data/worst-best-fit.csv
+./benchmark-worst-system system > data/worst-system.csv
+
+./benchmark-best-first-fit first-fit > data/best-first-fit.csv
+./benchmark-best-best-fit best-fit > data/best-best-fit.csv
+./benchmark-best-system system > data/best-system.csv
