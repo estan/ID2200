@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <unistd.h>
+
+#include "malloc.h"
 #include "tst.h"
 #include "brk.h"
-#include <unistd.h>
 
 #define SIZE 128
 #define BIGSIZE 100

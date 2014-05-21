@@ -4,6 +4,8 @@
 #include <string.h>
 #include <sys/mman.h>
 
+#include "malloc_impl.h"
+
 #define MIN_UNITS 1024
 
 /* The most restrictive type of the machine. */
@@ -27,6 +29,10 @@ void *endHeap() {
     if (heap_end == 0)
         heap_end = sbrk(0);
     return heap_end;
+}
+
+size_t min(size_t a, size_t b) {
+    return a < b ? a : b;
 }
 
 /*
@@ -59,13 +65,17 @@ static header_t *add_memory(size_t nunits) {
     heap_end += npages * page_size;
     header = (header_t *)mem;
     header->s.size = nunits;
-    free(header + 1);
+    free_impl(header + 1);
     return freep;
 }
 
 /* Allocates size bytes and return a pointer to the allocated memory. */
-void *malloc(size_t size) {
+void *malloc_impl(size_t size) {
     header_t *p, *prevp;
+#if STRATEGY == 2
+    header_t *best = NULL;
+    size_t diff = (size_t)-1;
+#endif
 
     /* Calculate number of header-sized units required. */
     size_t nunits = (size + sizeof(header_t) - 1) / sizeof(header_t) + 1;
@@ -73,6 +83,7 @@ void *malloc(size_t size) {
     if (size == 0)
         return NULL; /* No-op */
 
+#if STRATEGY == 1
     for (prevp = freep, p = prevp->s.next; ; prevp = p, p = p->s.next) {
         if (p->s.size >= nunits) {
             /* p is big enough. */
@@ -96,10 +107,40 @@ void *malloc(size_t size) {
             }
         }
     }
+#elif STRATEGY == 2
+    for (prevp = freep, p = prevp->s.next; ; prevp = p, p = p->s.next) {
+        if (p->s.size >= nunits) {
+            if (p->s.size == nunits) {
+                prevp->s.next = p->s.next;
+                freep = prevp;
+                return (void *)(p + 1);
+            }
+            if (p->s.size - nunits < diff) {
+                best = p;
+                diff = p->s.size - nunits;
+            }
+        }
+        if (p == freep) {
+            if (best == NULL) {
+                /* No suitably large block found. */
+                if ((p = add_memory(nunits)) == NULL) {
+                    /* Out of memory */
+                    return NULL;
+                }
+            } else {
+                /* Allocate from tail end */
+                best->s.size -= nunits;
+                best += best->s.size;
+                best->s.size = nunits;
+                return (void *)(best + 1);
+            }
+        }
+    }
+#endif
 }
 
 /* Frees the memory pointed to by ptr. */
-void free(void *ptr) {
+void free_impl(void *ptr) {
     header_t *freed, *p;
 
     if (ptr == NULL) {
@@ -122,7 +163,7 @@ void free(void *ptr) {
     } else {
         freed->s.next = p->s.next;
     }
-    if(p + p->s.size == freed) {
+    if (p + p->s.size == freed) {
         /* Merge with lower neighbor. */
         p->s.size += freed->s.size;
         p->s.next = freed->s.next;
@@ -133,16 +174,16 @@ void free(void *ptr) {
 }
 
 /* Change size of memory block pointer to by ptr to size bytes. */
-void *realloc(void *ptr, size_t size) {
+void *realloc_impl(void *ptr, size_t size) {
     header_t *old_header;
     size_t old_size;
     void *new_ptr;
 
     if (ptr == NULL) {
-        return malloc(size);
+        return malloc_impl(size);
     }
     if (size == 0) {
-        free(ptr);
+        free_impl(ptr);
         return NULL;
     }
 
@@ -155,11 +196,13 @@ void *realloc(void *ptr, size_t size) {
     }
 
     /* Allocate new memory, copy contents and free old memory. */
-    if ((new_ptr = malloc(size)) == NULL) {
+    if ((new_ptr = malloc_impl(size)) == NULL) {
         return NULL;
     }
     memcpy(new_ptr, ptr, size < old_size ? size : old_size);
-    free(ptr);
+    free_impl(ptr);
 
     return new_ptr;
 }
+
+

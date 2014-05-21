@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <unistd.h>
+
+#include "malloc.h"
 #include "tst.h"
 #include "brk.h"
-#include <unistd.h>
 
 #define SIZE 10
 #define TIMES 10000

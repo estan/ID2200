@@ -1,8 +1,10 @@
-#ifndef MALLOC_H_
-#define MALLOC_H_
+#ifndef MALLOC_H
+#define MALLOC_H
 
-extern void *malloc(size_t);
-extern void free(void *);
-extern void *realloc(void *, size_t);
+#include "malloc_impl.h"
 
-#endif /* MALLOC_H_ */
+#define malloc malloc_impl
+#define realloc realloc_impl
+#define free free_impl
+
+#endif /* MALLOC_H */

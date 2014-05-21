@@ -4,6 +4,7 @@ tstmalloc
 tstmemory
 tstmerge
 tstrealloc
+figures
 *.o
 *.config
 *.creator*
