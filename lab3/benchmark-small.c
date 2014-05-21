@@ -15,7 +15,6 @@
 int main(int argc, char *argv[]) {
     int i;
     void *blocks[NUM_SMALL_BLOCKS];
-    long total_time = 0;
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <prefix>\n", argv[0]);
@@ -28,7 +27,6 @@ int main(int argc, char *argv[]) {
         blocks[i] = malloc(small_block_sizes[i]);
         TIMER_STOP();
         printf("%s-small,%ld\n", argv[1], TIMER_ELAPSED_NS());
-        total_time += TIMER_ELAPSED_NS();
     }
 
     /* Free blocks */
