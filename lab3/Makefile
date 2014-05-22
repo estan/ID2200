@@ -19,7 +19,7 @@ BENCHMARKS = benchmark-worst-first-fit \
 			 benchmark-memory-best-fit
 
 all: $(TESTS) $(BENCHMARKS)
-	#exec ./RUN_TESTS
+	exec ./RUN_TESTS
 
 malloc.o: malloc.c
 	$(CC) -c $(CFLAGS) -o $@ $^
