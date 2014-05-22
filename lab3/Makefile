@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g -Wall -ansi -D_GNU_SOURCE -DSTRATEGY=1
-BENCHMARK_CFLAGS = -O4 -Wall -ansi -D_GNU_SOURCE
+BENCHMARK_CFLAGS = -O4 -Wall -ansi -D_GNU_SOURCE -lrt
 
 TESTS = tstmerge \
         tstalgorithms \
