@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/mman.h>
 
-#include "malloc_impl.h"
+#include "malloc.h"
 
 #define MIN_UNITS 1024
 
@@ -65,12 +65,12 @@ static header_t *add_memory(size_t nunits) {
     heap_end += npages * page_size;
     header = (header_t *)mem;
     header->s.size = nunits;
-    free_impl(header + 1);
+    free(header + 1);
     return freep;
 }
 
 /* Allocates size bytes and return a pointer to the allocated memory. */
-void *malloc_impl(size_t size) {
+void *malloc(size_t size) {
     header_t *p, *prevp;
 #if STRATEGY == 2
     header_t *best = NULL;
@@ -140,7 +140,7 @@ void *malloc_impl(size_t size) {
 }
 
 /* Frees the memory pointed to by ptr. */
-void free_impl(void *ptr) {
+void free(void *ptr) {
     header_t *freed, *p;
 
     if (ptr == NULL) {
@@ -174,16 +174,16 @@ void free_impl(void *ptr) {
 }
 
 /* Change size of memory block pointer to by ptr to size bytes. */
-void *realloc_impl(void *ptr, size_t size) {
+void *realloc(void *ptr, size_t size) {
     header_t *old_header;
     size_t old_size;
     void *new_ptr;
 
     if (ptr == NULL) {
-        return malloc_impl(size);
+        return malloc(size);
     }
     if (size == 0) {
-        free_impl(ptr);
+        free(ptr);
         return NULL;
     }
 
@@ -196,11 +196,11 @@ void *realloc_impl(void *ptr, size_t size) {
     }
 
     /* Allocate new memory, copy contents and free old memory. */
-    if ((new_ptr = malloc_impl(size)) == NULL) {
+    if ((new_ptr = malloc(size)) == NULL) {
         return NULL;
     }
     memcpy(new_ptr, ptr, size < old_size ? size : old_size);
-    free_impl(ptr);
+    free(ptr);
 
     return new_ptr;
 }

@@ -4,10 +4,7 @@
 #include <unistd.h>
 
 #include "timer.h"
-
-#ifndef USE_SYSTEM_MALLOC
 #include "malloc.h"
-#endif
 
 #define NUM_BLOCKS 5000
 

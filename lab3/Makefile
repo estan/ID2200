@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -ansi -D_GNU_SOURCE -DSTRATEGY=2
+CFLAGS = -g -Wall -ansi -D_GNU_SOURCE -DSTRATEGY=1
 BENCHMARK_CFLAGS = -O4 -Wall -ansi -D_GNU_SOURCE
 
 TESTS = tstmerge \
@@ -34,7 +34,7 @@ benchmark-worst-best-fit: malloc.c benchmark-worst.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
 
 benchmark-worst-system: benchmark-worst.c
-	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
+	$(CC) $(BENCHMARK_CFLAGS) -o $@ $^
 
 benchmark-block-sizes-first-fit: malloc.c benchmark-block-sizes.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
@@ -43,7 +43,7 @@ benchmark-block-sizes-best-fit: malloc.c benchmark-block-sizes.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
 
 benchmark-block-sizes-system: benchmark-block-sizes.c
-	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
+	$(CC) $(BENCHMARK_CFLAGS) -o $@ $^
 
 benchmark-memory-first-fit: malloc.c benchmark-memory.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
