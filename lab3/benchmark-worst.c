@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         TIMER_START();
         blocks[i] = malloc(8177);
         TIMER_STOP();
-        printf("%d,%ld\n", i, TIMER_ELAPSED_NS());
+        printf("%d,%.2f\n", i, TIMER_ELAPSED_US());
     }
 
     /* Free blocks */

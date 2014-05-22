@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
     int i;
 
     printf("blocksize,avgtime\n");
-    fflush(stdout);
     for (i = 0; i < NUM_BLOCK_SIZES; ++i) {
         pid_t pid = fork();
         if (pid == -1) {
@@ -44,7 +43,6 @@ int main(int argc, char *argv[]) {
             }
             avg_time /= NUM_ALLOCS;
             printf("%lu,%.2f\n", block_sizes[i], avg_time);
-            fflush(stdout);
 
             /* Free allocations */
             for (j = 0; j < NUM_ALLOCS; ++j) {

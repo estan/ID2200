@@ -9,21 +9,14 @@ TESTS = tstmerge \
         tstmemory \
         tstrealloc
 
-#BENCHMARKS = benchmark-random-first-fit \
-             benchmark-random-best-fit \
-             benchmark-random-system \
-             benchmark-worst-first-fit \
-             benchmark-worst-best-fit \
-             benchmark-worst-system \
-             benchmark-best-first-fit \
-             benchmark-best-best-fit \
-             benchmark-best-system
 BENCHMARKS = benchmark-worst-first-fit \
              benchmark-worst-best-fit \
              benchmark-worst-system \
              benchmark-block-sizes-first-fit \
              benchmark-block-sizes-best-fit \
-             benchmark-block-sizes-system
+             benchmark-block-sizes-system \
+			 benchmark-memory-first-fit \
+			 benchmark-memory-best-fit
 
 all: $(TESTS) $(BENCHMARKS)
 	#exec ./RUN_TESTS
@@ -34,15 +27,6 @@ malloc.o: malloc.c
 $(TESTS): % : malloc.o %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-benchmark-random-first-fit: malloc.c benchmark-random.c
-	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
-
-benchmark-random-best-fit: malloc.c benchmark-random.c
-	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
-
-benchmark-random-system: benchmark-random.c
-	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
-
 benchmark-worst-first-fit: malloc.c benchmark-worst.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
 
@@ -50,15 +34,6 @@ benchmark-worst-best-fit: malloc.c benchmark-worst.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
 
 benchmark-worst-system: benchmark-worst.c
-	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
-
-benchmark-best-first-fit: malloc.c benchmark-best.c
-	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
-
-benchmark-best-best-fit: malloc.c benchmark-best.c
-	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
-
-benchmark-best-system: benchmark-best.c
 	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
 
 benchmark-block-sizes-first-fit: malloc.c benchmark-block-sizes.c
@@ -69,6 +44,12 @@ benchmark-block-sizes-best-fit: malloc.c benchmark-block-sizes.c
 
 benchmark-block-sizes-system: benchmark-block-sizes.c
 	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
+
+benchmark-memory-first-fit: malloc.c benchmark-memory.c
+	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
+
+benchmark-memory-best-fit: malloc.c benchmark-memory.c
+	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
 
 clean:
 	rm -f $(TESTS) $(BENCHMARKS) malloc.o
