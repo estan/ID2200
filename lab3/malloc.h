@@ -1,8 +1,8 @@
-#ifndef MALLOC_IMPL_H
-#define MALLOC_IMPL_H
+#ifndef MALLOC_H
+#define MALLOC_H
 
 void *malloc(size_t);
 void free(void *);
 void *realloc(void *, size_t);
 
-#endif /* MALLOC_IMPL_H */
+#endif /* MALLOC_H */
