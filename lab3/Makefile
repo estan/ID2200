@@ -9,7 +9,7 @@ TESTS = tstmerge \
         tstmemory \
         tstrealloc
 
-BENCHMARKS = benchmark-random-first-fit \
+#BENCHMARKS = benchmark-random-first-fit \
              benchmark-random-best-fit \
              benchmark-random-system \
              benchmark-worst-first-fit \
@@ -18,6 +18,12 @@ BENCHMARKS = benchmark-random-first-fit \
              benchmark-best-first-fit \
              benchmark-best-best-fit \
              benchmark-best-system
+BENCHMARKS = benchmark-worst-first-fit \
+             benchmark-worst-best-fit \
+             benchmark-worst-system \
+             benchmark-block-sizes-first-fit \
+             benchmark-block-sizes-best-fit \
+             benchmark-block-sizes-system
 
 all: $(TESTS) $(BENCHMARKS)
 	#exec ./RUN_TESTS
@@ -53,6 +59,15 @@ benchmark-best-best-fit: malloc.c benchmark-best.c
 	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
 
 benchmark-best-system: benchmark-best.c
+	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
+
+benchmark-block-sizes-first-fit: malloc.c benchmark-block-sizes.c
+	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=1 -o $@ $^
+
+benchmark-block-sizes-best-fit: malloc.c benchmark-block-sizes.c
+	$(CC) $(BENCHMARK_CFLAGS) -DSTRATEGY=2 -o $@ $^
+
+benchmark-block-sizes-system: benchmark-block-sizes.c
 	$(CC) $(BENCHMARK_CFLAGS) -DUSE_SYSTEM_MALLOC=1 -o $@ $^
 
 clean:

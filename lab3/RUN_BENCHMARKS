@@ -1,13 +1,19 @@
 #!/usr/bin/bash
 
-./benchmark-random-first-fit first-fit > data/random-first-fit.csv
-./benchmark-random-best-fit best-fit > data/random-best-fit.csv
-./benchmark-random-system system > data/random-system.csv
+set -v
 
-./benchmark-worst-first-fit first-fit > data/worst-first-fit.csv
-./benchmark-worst-best-fit best-fit > data/worst-best-fit.csv
-./benchmark-worst-system system > data/worst-system.csv
+#./benchmark-random-first-fit > data/random-first-fit.csv
+#./benchmark-random-best-fit > data/random-best-fit.csv
+#./benchmark-random-system > data/random-system.csv
 
-./benchmark-best-first-fit first-fit > data/best-first-fit.csv
-./benchmark-best-best-fit best-fit > data/best-best-fit.csv
-./benchmark-best-system system > data/best-system.csv
+#./benchmark-worst-first-fit > data/worst-first-fit.csv
+#./benchmark-worst-best-fit > data/worst-best-fit.csv
+#./benchmark-worst-system > data/worst-system.csv
+
+#./benchmark-best-first-fit > data/best-first-fit.csv
+#./benchmark-best-best-fit > data/best-best-fit.csv
+#./benchmark-best-system > data/best-system.csv
+
+./benchmark-block-sizes-first-fit > data/block-sizes-first-fit.csv
+./benchmark-block-sizes-best-fit > data/block-sizes-best-fit.csv
+./benchmark-block-sizes-system > data/block-sizes-system.csv

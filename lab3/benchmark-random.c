@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "timer.h"
 #include "random_blocks.h"
@@ -12,9 +13,13 @@
 int main(int argc, char *argv[]) {
     int i;
     void *blocks[NUM_RANDOM_BLOCKS];
+    srand(time(0));
+
+    printf("op_nr,time\n");
 
     /* Measure allocation time */
     for (i = 0; i < NUM_RANDOM_BLOCKS; ++i) {
+        usleep(rand() % 1000);
         TIMER_START();
         blocks[i] = malloc(random_block_sizes[i]);
         TIMER_STOP();
